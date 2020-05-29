@@ -1,0 +1,7 @@
+@import ltbs.uniform._
+
+@(key: String, errormessage: play.twirl.api.Html, messages: UniformMessages[Html])
+
+<span id="@key-error" class="govuk-error-message">
+  <span class="govuk-visually-hidden">@messages("error"):</span> @errormessage
+</span>

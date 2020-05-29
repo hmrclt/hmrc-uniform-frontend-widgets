@@ -1,0 +1,48 @@
+@import ltbs.uniform._
+@import cats.implicits._
+
+@(keys: List[String], value: String, errors: ErrorTree, messages: UniformMessages[Html], width: Option[Either[Int,String]] = None, autocomplete: Option[String] = None, spellcheck: Boolean = true, inputMode: Option[String] = None, pattern: Option[String] = None)
+
+<div class="govuk-form-group@if(errors.definedAtRoot){ govuk-form-group--error}">
+  
+  <label class="govuk-label" for="@{keys.mkString("_")}">
+    @messages.decompose({keys :+ "label"}.mkString("."))
+  </label>
+
+  @messages.get({keys :+ "hint"}.mkString(".")).map { hint => 
+    <span id="@{keys.mkString(".")}-hint" class="govuk-hint">
+      @hint
+    </span>
+  }
+
+  @errors.valueAtRootList.map { error =>
+    @error_message(keys.mkString("."), error.prefixWith(keys).render(messages), messages)
+  }
+    
+  @classes=@{
+    List(
+      Some("govuk-input"),
+      width.map{_.fold("govuk-input--width-" + _, "govuk-!-width-" + _)}, 
+      Some("govuk-input--error").filter(_ => errors.definedAtRoot)
+    ).flatten.mkString(" ")
+  }
+
+  @aria=@{
+    List(
+      Some(keys.mkString(".") + "-hint").filter(_ => messages.get({keys :+ "hint"}.mkString(".")).nonEmpty),
+      Some(keys.mkString(".") + "-error").filter(_ => errors.definedAtRoot)
+    ).flatten.mkString(" ")
+  }
+ 
+  <input class="@classes"
+	 id="@{keys.mkString("_")}"
+	 name="@{keys.mkString(".")}"
+	 type="text"
+	 @if(value.nonEmpty) { value="@value" }
+	 @if(aria.nonEmpty) { aria-describedby="@aria" }
+	 @autocomplete.map { ac => autocomplete="@ac" }
+         @pattern.map{ i => pattern="@i" }  
+         @inputMode.map{ i => inputmode="@i" }
+         @if(!spellcheck) { spellcheck="false" } 
+	 /> 
+</div>

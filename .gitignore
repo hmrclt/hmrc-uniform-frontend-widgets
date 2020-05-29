@@ -1,2 +1,8 @@
 *.class
 *.log
+*/target
+target
+.bloop
+.metals
+nohup.out
+project/metals.sbt

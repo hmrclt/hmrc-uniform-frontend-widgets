@@ -1,0 +1,71 @@
+@import ltbs.uniform._
+@import cats.implicits._
+
+@(key: List[String], values: String, errors: ErrorTree, messages: UniformMessages[Html], autoFields: Option[String] = None)
+
+@headKey=@{key.headOption.getOrElse("")}
+
+@percentageInput=@{
+    headKey === "report-social-media-operating-margin" ||
+    headKey === "report-search-engine-operating-margin" ||
+    headKey === "report-online-marketplace-operating-margin"
+}
+
+@currencyInput=@{
+    headKey === "relief-deducted"||
+    headKey === "allowance-deducted"||
+    headKey === "group-liability"||
+    headKey.contains("company-liabilities")
+}
+
+@telInput=@{key.contains("phoneNumber")}
+
+@autoComplete=@{key match {
+    case k if k.contains("forename") => "given-name"
+    case k if k.contains("surname") => "family-name"
+    case k if k.contains("phoneNumber") => "tel"
+    case k if k.contains("line1") => "address-line1"
+    case k if k.contains("line2") => "address-line2"
+    case k if k.contains("line3") => "address-line3"
+    case k if k.contains("line4") => "address-level4"
+    case k if k.contains("postcode") | k.contains("company-registered-office-postcode") => "postal-code"
+    case k if k.contains("country") => "country-name"
+    case k if k.contains("email") => "email"
+    case _ => ""
+}}
+
+<div class="form-group@if(errors.definedAtRoot){ form-group-error}">
+    @standard_field(key, errors, "string", messages) {
+    
+        @if(percentageInput){
+            <span class="dst-label__currency">%
+        }
+        @if(currencyInput){
+            <span class="dst-label__currency">£
+            }
+        @*
+        * Todo - refactor this describedby error/hint string value to be a helper
+        *@
+        @defining((messages.get(s"${key.mkString(".")}.hint").isDefined, errors.definedAtRoot) match {
+        case (true,true) => s"${key.mkString(".")}-hint ${key.mkString(".")}-error"
+        case (true,false) => s"${key.mkString(".")}-hint"
+        case (false,true) => s"${key.mkString(".")}-error"
+        case _ => ""
+        }){ describedBy =>
+            <input 
+                class="form-control form-control-2-3 @if(errors.definedAtRoot) {form-control-error}"
+                id="@{key.mkString("_")}-input"
+                @if(telInput){ inputmode="numeric" pattern="[0-9]*" }
+                name="@{key.mkString(".")}"
+                value="@{values}"
+                @autoFields.map { f => autocomplete=@f }
+                @if(describedBy.nonEmpty){aria-describedby="@describedBy"}
+                @if(autoComplete){autocomplete="@{autoComplete}"}
+            />  
+        }
+
+        @if(percentageInput || currencyInput){
+            </span>
+        }
+    }
+</div>

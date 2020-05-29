@@ -1,0 +1,33 @@
+@import uk.gov.hmrc.uniformwidgets.data.Table
+
+@(caption: String, table: Table[Html])
+<table class="govuk-table">
+  <caption class="govuk-table__caption">@caption</caption>
+
+  @partitioned=@{table.data.partition(_.forall(_.heading))}
+  <thead class="govuk-table__head">
+    @partitioned._1.map { row => 
+      <tr class="govuk-table__row">
+        @row.map { cell =>
+          <th scope="col" class="govuk-table__header">@{cell.value}</th>
+        }
+      </tr>
+    }
+  </thead>
+  
+  <tbody class="govuk-table__body">
+    @partitioned._2.map { row =>     
+      <tr class="govuk-table__row">
+        @row.map { cell =>
+	  @if(cell.heading) { 
+            <th scope="row" class="govuk-table__header">@{cell.value}</th>
+	  } else { 
+            <td class="govuk-table__cell">@{cell.value}</td>
+	  }
+	}
+      </tr>
+      
+    }
+  </tbody>
+</table>
+
